@@ -1,10 +1,32 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+
 import InputField from "../components/input-fields";
+
+import { authValidation } from "../utils/validation";
 
 const AuthenticationPage = () => {
   const [isSignin, setIsSignIn] = useState(true);
+  const [validationError, setValidationError] = useState("");
+
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
 
   const handleToggleSignIn = () => setIsSignIn(!isSignin);
+
+  const handleFormSubmit = () => {
+    const email = emailRef.current?.value;
+    const password = passwordRef.current?.value;
+    let error: string;
+    if (!isSignin) {
+      const name = nameRef.current?.value;
+      error = authValidation(email, password, name, true);
+    } else {
+      error = authValidation(email, password);
+    }
+
+    setValidationError(error);
+  };
 
   return (
     <section className="relative flex items-center bg-[url(signin-bg.jpg)] bg-center w-full h-screen">
@@ -23,12 +45,35 @@ const AuthenticationPage = () => {
           {isSignin ? "Sign In" : "Sign Up"}
         </h1>
 
-        <div className="flex flex-col gap-4 mt-8">
-          {!isSignin && <InputField id="name" type="text" label="Full name" />}
-          <InputField id="email" type="email" label="Email or mobile number" />
-          <InputField id="password" type="password" label="Password" />
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleFormSubmit();
+          }}
+          className="flex flex-col gap-4 mt-8"
+        >
+          {!isSignin && (
+            <InputField ref={nameRef} id="name" type="text" label="Full name" />
+          )}
+          <InputField
+            ref={emailRef}
+            id="email"
+            type="email"
+            label="Email or mobile number"
+          />
+          <InputField
+            ref={passwordRef}
+            id="password"
+            type="password"
+            label="Password"
+          />
 
-          <button className="bg-red-600 text-white cursor-pointer rounded-sm font-medium py-2">
+          {validationError && <p className="text-red-600">{validationError}</p>}
+
+          <button
+            type="submit"
+            className="bg-red-600 text-white cursor-pointer rounded-sm font-medium py-2"
+          >
             {isSignin ? "Sign in" : "Sign up"}
           </button>
 
@@ -41,7 +86,7 @@ const AuthenticationPage = () => {
               {isSignin ? " Sign up now." : "Sign in now."}
             </span>
           </p>
-        </div>
+        </form>
       </div>
     </section>
   );
