@@ -1,8 +1,13 @@
 import { useRef, useState } from "react";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 
 import InputField from "../components/input-fields";
 
 import { authValidation } from "../utils/validation";
+import { auth } from "../utils/firebase";
 
 const AuthenticationPage = () => {
   const [isSignin, setIsSignIn] = useState(true);
@@ -26,6 +31,38 @@ const AuthenticationPage = () => {
     }
 
     setValidationError(error);
+
+    if (error) return;
+
+    if (!isSignin) {
+      createUserWithEmailAndPassword(auth, email!, password!)
+        .then((userCredentials) => {
+          const user = userCredentials.user;
+          console.log("🚀 ~ createUserWithEmailAndPassword ~ user:", user);
+        })
+        .catch((err) => {
+          const errCode = err.code;
+          const errMsg = err.message;
+          console.log(errCode);
+          console.log(errMsg);
+          setValidationError(errCode + " " + errMsg);
+        });
+    } else {
+      signInWithEmailAndPassword(auth, email!, password!)
+        .then((userCredentials) => {
+          const user = userCredentials.user;
+          console.log("🚀 ~ createUserWithEmailAndPassword ~ user:", user);
+        })
+        .catch((err) => {
+          const errCode = err.code;
+          console.log("🚀 ~ handleFormSubmit ~ errCode:", errCode);
+          const errMsg = err.message;
+          console.log("🚀 ~ handleFormSubmit ~ errMsg:", errMsg);
+          console.log(errCode);
+          console.log(errMsg);
+          setValidationError(errCode + " " + errMsg);
+        });
+    }
   };
 
   return (
